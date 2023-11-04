@@ -14,6 +14,191 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
+# SQL DDL Code: 
+
+CREATE TABLE CTract
+(
+    FIPSCode11 INT(11) PRIMARY KEY,
+    Name VARCHAR(20),
+    Area DOUBLE,
+    State VARCHAR(250),
+    County VARCHAR(250),
+    BuildingValue DOUBLE,
+    AgriculturalValue DOUBLE,
+    RiskScore DOUBLE,
+    CommunityResilenceScore DOUBLE,
+    SocialVulnerabilityScore DOUBLE
+);
+
+CREATE TABLE RiskProfile
+(
+    HazardType ENUM('Avalanche', 'Coastal Flooding', 'Cold Wave', 'Drought', 'Earthquake',
+                   'Hail','Heat Wave','Hurricane','Ice Storm','Landslide',
+                   'Lightning','Riverine Flooding','Strong Wind','Tornado',
+                   'Tsunami','Volcanic Activity','Wildfire','Winter Weather'),
+    FIPSCode11 INT(11),
+    NumberOfEvents DOUBLE,
+    AnnualLossBuildingValue DOUBLE,
+    AnnualLossPopulation DOUBLE,
+    AnnualLossTotal DOUBLE,
+    AnnualLossScore DOUBLE,
+    ExposureBuldingValue DOUBLE,
+    ExposurePopulation DOUBLE,
+    ExposureArea DOUBLE,
+    ExposureTotal DOUBLE,
+    PercentageLossPopulation DOUBLE,
+    PercentageLossBuildings DOUBLE,
+    PRIMARY KEY (HazardType, FIPSCode11),
+    FOREIGN KEY (FIPSCode11) REFERENCES CTract(FIPSCode11)
+);
+
+CREATE TABLE SurveyResults
+(
+    SurveyYear YEAR,
+    FIPSCode11 INT(11),
+    TotalPopulation DOUBLE,
+    SexRatio DOUBLE,
+    AgeMedian DOUBLE,
+    PRIMARY KEY (SurveyYear, FIPSCode11),
+    FOREIGN KEY (FIPSCode11) REFERENCES CTract(FIPSCode11)
+);
+
+
+CREATE TABLE SurveyMigration
+(
+    SurveyYear YEAR,
+    FIPSCode11 INT(11),
+    MigrationStatus ENUM('Moved; from abroad', 'Moved; from different state',
+                         'Moved; from different county', 'Moved; within same county', 'Any'),
+    PopAge_1_4 DOUBLE,
+    PopAge_5_17 DOUBLE,
+    PopAge_18_24 DOUBLE,
+    PopAge_25_34 DOUBLE,
+    PopAge_35_44 DOUBLE,
+    PopAge_45_54 DOUBLE,
+    PopAge_55_64 DOUBLE,
+    PopAge_65_74 DOUBLE,
+    PopAge_75 DOUBLE,
+    EducationMedian DOUBLE,
+    PopEd_LessHigh DOUBLE,
+    PopEd_High DOUBLE,
+    PopEd_SomeCol DOUBLE,
+    PopEd_Bach DOUBLE,
+    PopEd_GradCol DOUBLE,
+    IndividualIncomeMedian DOUBLE,
+    PopInc_9k DOUBLE,
+    PopInc_10k_15k DOUBLE,
+    PopInc_15k_25k DOUBLE,
+    PopInc_25k_35k DOUBLE,
+    PopInc_35k_50k DOUBLE,
+    PopInc_50k_65k DOUBLE,
+    PopInc_65k_75k DOUBLE,
+    PopInc_75k DOUBLE,
+    PopOwner_1YearTenure DOUBLE,
+		PopRenter_1YearTenure DOUBLE, 
+    PRIMARY KEY (SurveyYear, FIPSCode11, MigrationStatus),
+    FOREIGN KEY (FIPSCode11) REFERENCES CTract(FIPSCode11)
+);
 ```{r survey_data}
-dfSurvey <- read
+dfNRI <- read.csv("/bioinfo/cmcdonald04/UPenn/NRI_Table_CensusTracts/NRI_Table_CensusTracts.csv")
+```
+
+
+```{r survey_ctract}
+# CREATE TABLE CTract
+# (
+#     FIPSCode11 INT(11) PRIMARY KEY,
+#     Name VARCHAR(20),
+#     Area DOUBLE,
+#     State VARCHAR(250),
+#     County VARCHAR(250),
+#     BuildingValue DOUBLE,
+#     AgriculturalValue DOUBLE,
+#     RiskScore DOUBLE,
+#     CommunityResilenceScore DOUBLE,
+#     SocialVulnerabilityScore DOUBLE
+# );
+
+# Dropped name column. Was uninformative. 
+dfCTract <- dfNRI %>% 
+    rename(Area = AREA, State = STATE, County = COUNTY, 
+        BuildingValue = BUILDVALUE, AgriculatureValue = AGRIVALUE,
+        RiskScore = RISK_SCORE, CommunityResilenceScore = RESL_SCORE, 
+        SocialVulnerabilityScore = SOVI_SCORE) %>% 
+    mutate(FipsCode11 = str_pad(TRACTFIPS, 11, pad = "0")) %>% 
+    select("FipsCode11", "Area", "State", "County", 
+        "BuildingValue", "AgriculatureValue",
+        "RiskScore", "CommunityResilenceScore", 
+        "SocialVulnerabilityScore")
+
+dfCTract %>% 
+    write.csv(file = "IngestionReadyData/TBL_CTract.csv", row.names = FALSE)
+```
+
+```{r survey_data}
+# CREATE TABLE RiskProfile
+# (
+#     HazardType ENUM('Avalanche', 'Coastal Flooding', 'Cold Wave', 'Drought', 'Earthquake',
+#                    'Hail','Heat Wave','Hurricane','Ice Storm','Landslide',
+#                    'Lightning','Riverine Flooding','Strong Wind','Tornado',
+#                    'Tsunami','Volcanic Activity','Wildfire','Winter Weather'),
+#     FIPSCode11 INT(11),
+#     NumberOfEvents DOUBLE, X 
+#     AnnualLossBuildingValue DOUBLE, X 
+#     AnnualLossPopulation DOUBLE, X 
+#     AnnualLossTotal DOUBLE, X 
+#     AnnualLossScore DOUBLE, X 
+#     ExposureBuldingValue DOUBLE,X 
+#     ExposurePopulation DOUBLE, X 
+#     ExposureArea DOUBLE,X 
+#     ExposureTotal DOUBLE, X 
+#     PercentageLossPopulation DOUBLE,
+#     PercentageLossBuildings DOUBLE,
+#     PRIMARY KEY (HazardType, FIPSCode11),
+#     FOREIGN KEY (FIPSCode11) REFERENCES CTract(FIPSCode11)
+# );
+
+dfRiskProfile <- dfNRI %>% 
+    mutate(FipsCode11 = str_pad(TRACTFIPS, 11, pad = "0")) %>% 
+    select(FipsCode11, contains("_EVNTS"), 
+        contains("_EALB"), contains("_EALP"), contains("_EALT"), contains("_EALS"),
+        contains("_EXPB"), contains("_EXPP"), contains("_EXP_AREA"),  contains("_EXPT"), 
+        contains("_AVLN_ALRB"), contains("_AVLN_ALRP"))%>% 
+    pivot_longer(cols = -FipsCode11, names_to = "columns", values_to = "values") %>% 
+    separate(col = columns, sep = "_", into = c("disaster_code", "measure"), extra = "merge") %>% 
+    mutate(measure = recode(measure,
+        "EVNTS" = "NumberOfEvents", 
+        "EALB" = "AnnualLossBuildingValue", 
+        "EALP" = "AnnualLossPopulation",
+        "EALT" = "AnnualLossTotal",
+        "EALS" = "AnnualLossScore", 
+        "EXPB" = "ExposureBuldingValue", 
+        "EXPP" = "ExposurePopulation", 
+        "EXP_AREA" = "ExposureArea", 
+        "EXPT" = "ExposureTotal", 
+        "AVLN_ALRB" = "PercentageLossPopulation", 
+        "AVLN_ALRP" = "PercentageLossBuildings")) %>%
+    mutate(HazardType = recode(disaster_code, 
+        "AVLN" = 'Avalanche', 
+        "CFLD" = 'Coastal Flooding', 
+        "CWAV" = 'Cold Wave',
+        "DRGT" = 'Drought', 
+        "ERQK" = 'Earthquake',
+        "HAIL" = 'Hail',
+        "HWAV" = 'Heat Wave',
+        "HRCN" = 'Hurricane',
+        "ISTM" = 'Ice Storm',
+        "LNDS" = 'Landslide',
+        "LTNG" = 'Lightning',
+        "RFLD" = 'Riverine Flooding',
+        "SWND" = 'Strong Wind',
+        "TRND" = 'Tornado',
+        "TSUN" = 'Tsunami',
+        "VLCN" = 'Volcanic Activity',
+        "WFIR" = 'Wildfire',
+        "WNTW" = 'Winter Weather')) %>% 
+    pivot_wider(id_cols = c(FipsCode11, HazardType), names_from = measure, values_from = values)
+
+dfRiskProfile %>% 
+    write.csv(file = "IngestionReadyData/TBL_RiskProfile.csv", row.names = FALSE)
 ```
