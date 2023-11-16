@@ -1,48 +1,20 @@
-# CREATE TABLE SurveyResults
-# (
-#     SurveyYear YEAR,
-#     FIPSCode11 INT(11),
-#     MigrationStatus ENUM('Moved; from abroad', 'Moved; from different state',
-#                          'Moved; from different county', 'Moved; within same county', 'Any'),
-#     TotalPopulation DOUBLE,
-#     SexRatio DOUBLE,
-#     AgeMedian DOUBLE,
-#     PopAge_1_4 DOUBLE,
-#     PopAge_5_17 DOUBLE,
-#     PopAge_18_24 DOUBLE,
-#     PopAge_25_34 DOUBLE,
-#     PopAge_35_44 DOUBLE,
-#     PopAge_45_54 DOUBLE,
-#     PopAge_55_64 DOUBLE,
-#     PopAge_65_74 DOUBLE,
-#     PopAge_75 DOUBLE,
-#     EducationMedian DOUBLE,
-#     PopEd_LessHigh DOUBLE,
-#     PopEd_High DOUBLE,
-#     PopEd_SomeCol DOUBLE,
-#     PopEd_Bach DOUBLE,
-#     PopEd_GradCol DOUBLE,
-#     IndividualIncomeMedian DOUBLE,
-#     PopInc_9k DOUBLE,
-#     PopInc_10k_15k DOUBLE,
-#     PopInc_15k_25k DOUBLE,
-#     PopInc_25k_35k DOUBLE,
-#     PopInc_35k_50k DOUBLE,
-#     PopInc_50k_65k DOUBLE,
-#     PopInc_65k_75k DOUBLE,
-#     PopInc_75k DOUBLE,
-#     PopOwner_1YearTenure DOUBLE,
-# 	  PopRenter_1YearTenure DOUBLE, 
-#     PRIMARY KEY (SurveyYear, FIPSCode11),
-#     FOREIGN KEY (FIPSCode11) REFERENCES CTract(FIPSCode11)
-# );
+#!/usr/bin/env Rscript
+install.packages(tidyverse)
+install.packages(glue) 
+
+library(glue)
+library(tidyverse)
+
+args <- commandArgs(trailingOnly=TRUE)
+locACS <- arg[1]
+strYear <- arg[2]
 
 lStringsToRemove <- c("Population.1.year.and.over..", "INDIVIDUAL.INCOME.IN.THE.PAST.12.MONTHS..IN.2021.INFLATION.ADJUSTED.DOLLARS...", 
                       "Moved..from.different.county..same.state..", "Moved..from.abroad..", "Moved..from.different..state..", "Moved..within.same.county..", "Total..")
 
 dfSurveyResults <- dfACS %>% 
     separate(Geography, sep = "US", into = c(NA,"FIPSCode11"), extra = "merge") %>% 
-    mutate(SurveyYear = 2021) %>% 
+    mutate(SurveyYear = strYear) %>% 
     # select(FIPSCode11, SurveyYear, Estimate..Total..Population.1.year.and.over) %>% 
     pivot_longer(names_to = "columns", cols = c(-FIPSCode11, -SurveyYear), values_to = "values", values_transform = as.numeric) %>% 
     mutate(columns = str_remove_all(columns, pattern = "Estimate..")) %>% 
