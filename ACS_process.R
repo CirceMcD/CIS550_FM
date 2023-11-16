@@ -9,7 +9,7 @@ args <- commandArgs(trailingOnly=TRUE)
 locACS <- arg[1]
 strYear <- arg[2]
 
-dfACD <- read.csv(locACS, skip = 1) %>% 
+dfACS <- read.csv(locACS, skip = 1) %>% 
     select(Geography, starts_with("Estimate."))
 
 lStringsToRemove <- c("Population.1.year.and.over..", "INDIVIDUAL.INCOME.IN.THE.PAST.12.MONTHS..IN.2021.INFLATION.ADJUSTED.DOLLARS...", 
