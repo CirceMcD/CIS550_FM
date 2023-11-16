@@ -9,6 +9,9 @@ args <- commandArgs(trailingOnly=TRUE)
 locACS <- arg[1]
 strYear <- arg[2]
 
+dfACD <- read.csv(locACS, skip = 1) %>% 
+    select(Geography, starts_with("Estimate."))
+
 lStringsToRemove <- c("Population.1.year.and.over..", "INDIVIDUAL.INCOME.IN.THE.PAST.12.MONTHS..IN.2021.INFLATION.ADJUSTED.DOLLARS...", 
                       "Moved..from.different.county..same.state..", "Moved..from.abroad..", "Moved..from.different..state..", "Moved..within.same.county..", "Total..")
 
@@ -66,5 +69,4 @@ dfSurveyResults <- dfACS %>%
             PopOwner_1YearTenure,PopRenter_1YearTenure)
 
 dfSurveyResults %>% 
-    write.csv(file = "IngestionReadyData/TBL_SurveyResults.csv", row.names = FALSE)
-```
+    write.csv(file = glue("IngestionReadyData/TBL_{year}_SurveyResults.csv"), row.names = FALSE)
