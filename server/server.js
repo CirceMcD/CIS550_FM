@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const config = require('./config');
 const routes = require('./routes');
 
@@ -7,6 +8,9 @@ const app = express();
 app.use(cors({
   origin: '*',
 }));
+// Added the following 2 lines per https://stackoverflow.com/questions/41955103/cant-get-post-data-using-nodejs-expressjs-and-postman
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // We use express to define our various API endpoints and
 // provide their handlers that we implemented in routes.js
