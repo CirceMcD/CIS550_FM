@@ -139,7 +139,7 @@ const highestRiskCensusTracts = async function(req, res){
   // TODO - I redid this query, because what we had in the Milestone 3 doc didn't make sense. However, I have not tested it and it may need help.
   // TODO - What will the default value be in each _Score when there is no record for it?
   connection.query(`
-  SELECT DISTINCT CTract.State, CTract.County, CTract.FIPSCode11, Concat(CTract.State,' ',CTract.County,' ',RIGHT(CTract.FIPSCode11, 6)) AS Name, RiskProfile.RiskScore, 
+  SELECT DISTINCT CTract.State, CTract.County, CTract.FIPSCode11, Concat(CTract.State,' ',CTract.County,' ',RIGHT(CTract.FIPSCode11, 6)) AS Name, 
   (SELECT AnnualLossScore FROM RiskProfile WHERE HazardType = 'Avalanche') AS 'Avalanche_Score',
   (SELECT AnnualLossScore FROM RiskProfile WHERE HazardType = 'Coastal Flooding') AS 'Coastal_Flooding_Score',
   (SELECT AnnualLossScore FROM RiskProfile WHERE HazardType = 'Cold Wave') AS 'Cold_Wave_Score',
@@ -159,7 +159,7 @@ const highestRiskCensusTracts = async function(req, res){
   (SELECT AnnualLossScore FROM RiskProfile WHERE HazardType = 'Winter Weather') AS 'Winter_Weather_Score'
   FROM CTract 
     JOIN RiskProfile ON CTract.FIPSCode11 = RiskProfile.FIPSCode11
-  ORDER BY RiskProfile.RiskScore DESC
+  ORDER BY RiskProfile.AnnualLossScore DESC
   LIMIT ` + pageSize + ` OFFSET ` + ((page-1)*pageSize) // Where page will always be geq 1.
 , (err, data) => {
   if (err || data.length === 0) {
@@ -201,7 +201,7 @@ const highestMigrationCensusTracts = async function(req, res){
   connection.query(`
   WITH TotalMigration AS (SELECT SUM(TotalPopulation) AS MigrationLevel, FIPSCode11 
                           FROM SurveyResults 
-                          WHERE MigrayionStatus = 'Moved; from abroad' OR MigrationStatus = 'Moved; from different state' OR MigrationStatus = 'Moved; from different county' 
+                          WHERE MigrationStatus = 'Moved; from abroad' OR MigrationStatus = 'Moved; from different state' OR MigrationStatus = 'Moved; from different county' 
                           GROUP BY FIPSCode11)
   SELECT c.State, c.County, t.MigrationLevel, Concat(c.State,' ',c.County,' ',RIGHT(c.FIPSCode11, 6)) AS Name
   FROM TotalMigration t
