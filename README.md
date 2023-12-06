@@ -90,6 +90,7 @@ This application, Climate-Linked Internal Migration Analysis Tool for Environmen
 * workbox-webpack-plugin: 3.6.3
 
 # Data Cleaning: 
-Data was cleaned in R (v4.2.0). Please refer to Link
+Data was cleaned in R (v4.2.0). Please refer to the [Data Cleaning](DataCleaning) folder for [data preprocessing](DataCleaning/DataPreprocessing.Rmd) and [summary statistics](DataCleaning/SummaryStats.R) scripts. 
 
 # Data Ingestion: 
+Please refer to the [Data Ingestion](DataIngestion) folder for [table creation](DataIngestion/TableCreation.sql) amd [data ingestion](DataIngestion/DataIngestion.sql) scripts. 
