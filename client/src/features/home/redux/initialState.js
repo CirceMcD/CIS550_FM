@@ -1,5 +1,7 @@
 const initialState = {
   communityResilenceSearchResults:null,
+  mostRiskPeoplePerCountryResults:null,
+  climateRiskInMostDenseCountiesResults:null,
   censusTractFilterResult: null,
   censusTractFilterSuggest: null,
   communityResilenceSearchSuggest: null,

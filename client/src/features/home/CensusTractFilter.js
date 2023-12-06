@@ -13,7 +13,7 @@ export class CensusTractFilter extends Component {
   };
 
   componentDidMount() {
-    this.props.actions.getCensusTractFilterSearchResult();
+    
   }
 
   render() {

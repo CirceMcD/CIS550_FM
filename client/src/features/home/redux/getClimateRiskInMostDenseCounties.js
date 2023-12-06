@@ -6,6 +6,7 @@ import {
   HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_FAILURE,
   HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_DISMISS_ERROR,
 } from './constants';
+import Axios from 'axios';
 
 export function getClimateRiskInMostDenseCounties(args = {}) {
   return (dispatch) => { // optionally you can have getState as the second argument
@@ -13,28 +14,30 @@ export function getClimateRiskInMostDenseCounties(args = {}) {
       type: HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_BEGIN,
     });
 
-    const promise = new Promise((resolve, reject) => {
-      const doRequest = args.error ? Promise.reject(new Error()) : Promise.resolve();
-      doRequest.then(
-        (res) => {
-          dispatch({
-            type: HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_SUCCESS,
-            data: res,
-          });
-          resolve(res);
-        },
-        // Use rejectHandler as the second argument so that render errors won't be caught.
-        (err) => {
-          dispatch({
-            type: HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_FAILURE,
-            data: { error: err },
-          });
-          reject(err);
-        },
-      );
-    });
-
-    return promise;
+    Axios.defaults.baseURL = 'http://127.0.0.1:8080';
+    const url = `/climateRiskInMostDenseCounties`;
+    return Axios(url, {
+      method: 'get',
+      responseType: 'json',
+    })
+      .then(res => {
+        const { data, headers } = res;
+        dispatch({
+          type: HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_SUCCESS,
+          data: data,
+        });
+      })
+      .catch(err => {
+        // dispatch({
+        //   type: HOME_GET_LOWEST_RISK_CENSUS_TRACTS_FAILURE,
+        //   data: mockData,
+        // });
+        // dispatch({
+        //   type: HOME_GET_CLIMATE_RISK_IN_MOST_DENSE_COUNTIES_SUCCESS,
+        //   data: mockData,
+        // });
+        // message.error("failed to download")
+      });
   };
 }
 
@@ -85,6 +88,7 @@ export function reducer(state, action) {
       // The request is success
       return {
         ...state,
+        climateRiskInMostDenseCountiesResults:action.data,
         getClimateRiskInMostDenseCountiesPending: false,
         getClimateRiskInMostDenseCountiesError: null,
       };
