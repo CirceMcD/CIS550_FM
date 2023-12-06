@@ -13,6 +13,8 @@ import { reducer as getAverageClimateRiskByStateReducer } from './getAverageClim
 import { reducer as getAverageClimateRiskByIncomeReducer } from './getAverageClimateRiskByIncome';
 import { reducer as getCensusTractFilterSearchResultReducer } from './getCensusTractFilterSearchResult';
 import { reducer as getCommunityResilienceSuggestReducer } from './getCommunityResilienceSuggest';
+import { reducer as getMostRiskPeoplePerCountryReducer } from './getMostRiskPeoplePerCountry';
+import { reducer as getClimateRiskInMostDenseCountiesReducer } from './getClimateRiskInMostDenseCounties';
 
 const reducers = [
   uploadFileReducer,
@@ -29,6 +31,8 @@ const reducers = [
   getAverageClimateRiskByIncomeReducer,
   getCensusTractFilterSearchResultReducer,
   getCommunityResilienceSuggestReducer,
+  getMostRiskPeoplePerCountryReducer,
+  getClimateRiskInMostDenseCountiesReducer,
 ];
 
 export default function reducer(state = initialState, action) {

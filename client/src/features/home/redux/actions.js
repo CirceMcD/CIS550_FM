@@ -30,3 +30,8 @@ export {
   getCommunityResilienceSuggest,
   dismissGetCommunityResilienceSuggestError,
 } from './getCommunityResilienceSuggest';
+export { getMostRiskPeoplePerCountry, dismissGetMostRiskPeoplePerCountryError } from './getMostRiskPeoplePerCountry';
+export {
+  getClimateRiskInMostDenseCounties,
+  dismissGetClimateRiskInMostDenseCountiesError,
+} from './getClimateRiskInMostDenseCounties';
