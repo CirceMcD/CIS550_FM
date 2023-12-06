@@ -29,6 +29,13 @@ export class HomeLayout extends Component {
     this.setState({ collapsed });
   };
 
+  componentDidMount() {
+    this.props.actions.getCommunityResilienceSuggest();
+    this.props.actions.getCensusTractFilterSearchResult();
+    this.props.actions.getMostRiskPeoplePerCountry();
+    this.props.actions.getClimateRiskInMostDenseCounties();
+  }
+
   render() {
     const { collapsed } = this.state;
     const {title, subtitle} = this.props.home.layoutHeader;
@@ -49,6 +56,9 @@ export class HomeLayout extends Component {
               </Menu.Item>
               <Menu.Item key="climateResilienceScore" icon={<DesktopOutlined />}>
                 <Link to="/climate_resilience_score">Climate Resilience Score</Link>
+              </Menu.Item>
+              <Menu.Item key="risk_max" icon={<DesktopOutlined />}>
+                <Link to="/risk_max">Risk Max</Link>
               </Menu.Item>
             </Menu>
           </Sider>

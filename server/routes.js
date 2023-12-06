@@ -436,8 +436,125 @@ const averageClimateRiskByState = async function(req, res) {
   });
 };
 
+const mostRiskPeoplePerCountry = async function(req, res) {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+
+  const query = `
+    WITH pop_inc AS(
+        SELECT MAX(PopInc_75k) as HighIncPop, MAX(PopInc_10k_15k) as LowIncPop, S.FIPSCode11, C.County, C.State
+        FROM SurveyResults S
+        JOIN CTract C ON S.FIPSCode11 = C.FIPSCode11
+        GROUP BY State, County
+    ),
+    pop_risk AS (
+        SELECT pop_inc.*, R.HazardType, R.ExposurePopulation, R.AnnualLossScore
+        FROM RiskProfile R
+        LEFT JOIN pop_inc ON R.FIPSCode11 = pop_inc.FIPSCode11
+    )
+    SELECT HighIncPop, LowIncPop, County, State, HazardType, ExposurePopulation, LossScore
+    FROM (
+        SELECT pr.*, ROW_NUMBER() OVER (PARTITION BY pr.State, pr.County ORDER BY pr.LossScore DESC) AS RowNum
+        FROM (
+            SELECT HighIncPop, LowIncPop, County, State, HazardType, ExposurePopulation, AnnualLossScore as LossScore
+            FROM pop_risk
+        ) pr
+        WHERE pr.ExposurePopulation > 0
+        ORDER BY pr.ExposurePopulation DESC, pr.LossScore DESC
+    ) top_risk
+    WHERE top_risk.RowNum = 1 AND top_risk.HighIncPop > 0
+    ORDER BY top_risk.ExposurePopulation DESC
+    LIMIT ? OFFSET ?;
+  `;
+
+  connection.query(query, [pageSize, (page - 1) * pageSize], (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json([]);
+    } else {
+      const responseData = data.map(item => ({
+        highIncomePopulation: item.HighIncPop,
+        lowIncomePopulation: item.LowIncPop,
+        county: item.County,
+        state: item.State,
+        hazardType: item.HazardType,
+        exposurePopulation: item.ExposurePopulation,
+        lossScore: item.LossScore
+      }));
+      res.json(responseData);
+    }
+  });
+};
+
+
+const climateRiskInMostDenseCounties = async function(req, res) {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+
+  const query = `
+    WITH d1 as (
+        SELECT CTract.FIPSCode11, SurveyResults.TotalPopulation / CTract.Area AS Pop_Density, County, State
+        FROM CTract
+                 LEFT JOIN SurveyResults on CTract.FIPSCode11 = SurveyResults.FIPSCode11
+        WHERE SurveyResults.TotalPopulation > 0
+    ),
+    d2 as (
+        SELECT MIN(Pop_Density) AS Min_Density, MAX(Pop_Density) AS Max_Density, County, State
+        FROM d1
+        GROUP BY County, State
+        ORDER BY Max_Density DESC, State
+    ),
+    d3 as (
+        SELECT CTract.County, CTract.State, RiskProfile.*
+        FROM CTract JOIN RiskProfile ON CTract.FIPSCode11 = RiskProfile.FIPSCode11
+    ),
+    d4 as(
+        SELECT d3.County, d3.State, d3.HazardType, d3.AnnualLossScore, 
+               ROW_NUMBER() OVER (PARTITION BY FIPSCode11 ORDER BY AnnualLossScore DESC) AS rn
+        FROM d3
+    ),
+    d5 as (
+        SELECT County, State, HazardType, AnnualLossScore
+        FROM d4
+        WHERE rn = 1
+    ),
+    d6 as(
+        SELECT County, State, HazardType, MAX(AnnualLossScore) as AnnualLossScore
+        FROM d5
+        GROUP BY County, State
+    ),
+    d7 as(
+        SELECT d2.*, d6.HazardType, d6.AnnualLossScore
+        FROM d2 JOIN d6 On d2.County = d6.County AND d2.State = d6.State
+        ORDER BY Max_Density DESC
+    )
+    SELECT * FROM d7
+    LIMIT ? OFFSET ?;
+  `;
+
+  connection.query(query, [pageSize, (page - 1) * pageSize], (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json([]);
+    } else {
+      const responseData = data.map(item => ({
+        county: item.County,
+        state: item.State,
+        minDensity: item.Min_Density,
+        maxDensity: item.Max_Density,
+        hazardType: item.HazardType,
+        annualLossScore: item.AnnualLossScore
+      }));
+      res.json(responseData);
+    }
+  });
+};
+
+
 
 module.exports = {
+  climateRiskInMostDenseCounties,
+  mostRiskPeoplePerCountry,
   lowestRiskCensusTracts,
   communityResilienceSuggest,   
   communityResiliencePost,      // Takes params: selectedState, selectedCounty, selectedFIPSCode11

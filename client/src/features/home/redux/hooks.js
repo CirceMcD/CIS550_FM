@@ -12,3 +12,5 @@ export { useGetAverageClimateRiskByState } from './getAverageClimateRiskByState'
 export { useGetAverageClimateRiskByIncome } from './getAverageClimateRiskByIncome';
 export { useGetCensusTractFilterSearchResult } from './getCensusTractFilterSearchResult';
 export { useGetCommunityResilienceSuggest } from './getCommunityResilienceSuggest';
+export { useGetMostRiskPeoplePerCountry } from './getMostRiskPeoplePerCountry';
+export { useGetClimateRiskInMostDenseCounties } from './getClimateRiskInMostDenseCounties';

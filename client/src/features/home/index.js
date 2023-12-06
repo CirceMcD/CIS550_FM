@@ -9,3 +9,4 @@ export { default as RankTable } from './RankTable';
 export { default as CensusTractRank } from './CensusTractRank';
 export { default as ClimateResilienceScore } from './ClimateResilienceScore';
 export { default as UploadComponent } from './UploadComponent';
+export { default as RiskMax } from './RiskMax';

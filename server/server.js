@@ -25,7 +25,9 @@ app.get('/lowestRiskCensusTracts', routes.lowestRiskCensusTracts);
 app.get('/lowestMigrationCensusTracts', routes.lowestMigrationCensusTracts)       // default page = 1, pageSize = 10
 app.get('/highestMigrationCensusTracts', routes.highestMigrationCensusTracts);  // default page = 1, pageSize = 10
 app.get('/averageClimateRiskByIncome', routes.averageClimateRiskByIncome);      // default page = 1, pageSize = 10
-app.get('/averageClimateRiskByState', routes.averageClimateRiskByState);        // default page = 1, pageSize = 10
+app.get('/averageClimateRiskByState', routes.averageClimateRiskByState);
+app.get('/mostRiskPeoplePerCountry', routes.mostRiskPeoplePerCountry);
+app.get('/climateRiskInMostDenseCounties', routes.climateRiskInMostDenseCounties);
 
 app.listen(config.server_port, () => {
   console.log(`Server running at http://${config.server_host}:${config.server_port}/`)

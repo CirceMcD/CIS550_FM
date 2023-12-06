@@ -19,7 +19,7 @@ export class ConanLayout extends Component {
   }
 
   componentDidMount() {
-    this.props.actions.getCommunityResilienceSuggest();
+   
   }
 
   componentWillUnmount() {
