@@ -14,8 +14,8 @@ This application, Climate-Linked Internal Migration Analysis Tool for Environmen
 **Node.js v15.14.0** 
 
 1. git clone https://github.com/CirceMcD/CIS550_FM.git
-2. cd CIS550_FM/Application/client; npm install; npm start
-3. cd CIS550_FM/Application/server; npm install; npm start
+2. cd CIS550_FM/client; npm install; npm start
+3. cd CIS550_FM/server; npm install; npm start
 
 # Dependencies: 
 * @ant-design/charts: ^1.3.6  
